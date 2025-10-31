@@ -1,34 +1,51 @@
-# Device Frame Example
-# This configuration demonstrates device frame usage
+# 🎯 Device Frame Example
+# This configuration demonstrates device frame usage with the new v0.10.0+ config structure
+# NOTE: For multiple devices, create separate YAML files (e.g., iphone-frame.yaml, ipad-frame.yaml)
 
-project_name: "Device Frame Example"
-output_directory: "output"
+project:
+  name: "Device Frame Example"
+  output_dir: "output"
+  device: "iPhone 15 Pro - Natural Titanium - Portrait"
+  output_size: "iPhone6_7"  # 1290×2796 - iPhone 15 Pro Max App Store size
+
+defaults:
+  background:
+    type: "radial"
+    colors: ["#ff9a9e", "#fecfef"]
+    center: ["50%", "30%"]
 
 screenshots:
-  - name: "iPhone Screenshot with Frame"
-    source_image: "screenshots/app_screen.png"
-    device_frame: "iPhone 15 Pro - Natural Titanium - Portrait"
-    output_size: [1290, 2796]
-    
-    background:
-      type: "radial" 
-      colors: ["#ff9a9e", "#fecfef"]
-      center: ["50%", "30%"]
-    
-    text_overlays:
-      - content: "Now Available"
-        position: [100, 150]
-        font_size: 36
+  app_screen:
+    content:
+      - type: "image"
+        asset: "screenshots/app_screen.png"
+        position: ["50%", "50%"]
+        scale: 0.6
+        frame: true  # Enable device frame rendering
+
+      - type: "text"
+        content: "Now Available"
+        position: ["50%", "15%"]
+        size: 36
         color: "#333333"
         alignment: "center"
-        max_width: 500
 
-  - name: "iPad Screenshot with Frame"
-    source_image: "screenshots/app_screen_ipad.png"
-    device_frame: "iPad Pro 13 - M4 - Space Gray - Portrait"
-    output_size: [2048, 2732]
-    
+  feature_highlight:
     background:
-      type: "conic"
-      colors: ["#667eea", "#764ba2", "#f093fb", "#f5576c"]
-      center: ["50%", "50%"]
+      type: "linear"
+      colors: ["#667eea", "#764ba2"]
+      direction: 135
+    content:
+      - type: "image"
+        asset: "screenshots/feature_screen.png"
+        position: ["50%", "55%"]
+        scale: 0.5
+        frame: true
+
+      - type: "text"
+        content: "Amazing Features"
+        position: ["50%", "12%"]
+        size: 42
+        weight: "bold"
+        color: "#ffffff"
+        alignment: "center"
