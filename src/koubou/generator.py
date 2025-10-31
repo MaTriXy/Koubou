@@ -3,7 +3,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from PIL import Image
 
@@ -15,6 +15,90 @@ from .renderers.device_frame import DeviceFrameRenderer
 from .renderers.text import TextRenderer
 
 logger = logging.getLogger(__name__)
+
+
+def resolve_localized_asset(
+    asset: Union[str, Dict[str, str]],
+    language: str,
+    base_language: str,
+    config_dir: Optional[Path] = None,
+) -> str:
+    """Resolve localized asset path using hybrid approach.
+
+    Supports two formats:
+    1. String: Convention-based resolution with {lang}/ directory pattern
+    2. Dict: Explicit per-language paths with 'default' fallback
+
+    Resolution order:
+    - Dict format: explicit mapping[language] → mapping['default'] → ""
+    - String format: {lang}/path → {base_lang}/path → direct path
+
+    Args:
+        asset: Asset path (string or dict with language mappings)
+        language: Current language code (e.g., 'en', 'es')
+        base_language: Base/fallback language code
+        config_dir: Base directory for resolving relative paths
+
+    Returns:
+        Resolved asset path (empty string if not found)
+
+    Examples:
+        # Dict format (explicit mapping)
+        asset = {
+            "en": "path/en.png",
+            "es": "path/es.png",
+            "default": "path/fallback.png"
+        }
+        resolve_localized_asset(asset, "en", "en") → "path/en.png"
+
+        # String format (convention-based)
+        asset = "screenshots/hero.png"
+        # Returns "screenshots/es/hero.png" if exists
+        resolve_localized_asset(asset, "es", "en")
+        # Returns "screenshots/en/hero.png" if es not found
+        resolve_localized_asset(asset, "es", "en")
+        # Returns "screenshots/hero.png" if none found
+        resolve_localized_asset(asset, "es", "en")
+    """
+    if not asset:
+        return ""
+
+    # Case 1: Dict format - Explicit per-language mapping
+    if isinstance(asset, dict):
+        # Try exact language match
+        if language in asset:
+            return asset[language]
+        # Try default fallback
+        if "default" in asset:
+            return asset["default"]
+        # No match found
+        return ""
+
+    # Case 2: String format - Convention-based resolution
+    if isinstance(asset, str):
+        asset_path = Path(asset)
+
+        # Helper to check if path exists (handles relative/absolute)
+        def path_exists(p: Path) -> bool:
+            if p.is_absolute():
+                return p.exists()
+            if config_dir:
+                return (config_dir / p).exists()
+            return p.exists()
+
+        # Try {lang}/ convention
+        lang_path = asset_path.parent / language / asset_path.name
+        if path_exists(lang_path):
+            return str(lang_path)
+
+        # Try {base_lang}/ convention (if different from current lang)
+        if base_language != language:
+            base_lang_path = asset_path.parent / base_language / asset_path.name
+            if path_exists(base_lang_path):
+                return str(base_lang_path)
+
+        # Fallback to direct path
+        return asset
 
 
 class ScreenshotGenerator:
@@ -642,6 +726,12 @@ class ScreenshotGenerator:
                             )
 
                         # Convert to ScreenshotConfig and generate
+                        # Get base_language for asset resolution
+                        base_lang = (
+                            localization_config.base_language
+                            if localization_config
+                            else None
+                        )
                         temp_config = self._convert_to_screenshot_config(
                             processed_screenshot_def,
                             device,  # Use device name directly
@@ -649,6 +739,8 @@ class ScreenshotGenerator:
                             device_output_dir,
                             config_dir,
                             screenshot_id,
+                            language=language,
+                            base_language=base_lang,
                         )
                         if temp_config:
                             output_path = self.generate_screenshot(temp_config)
@@ -696,6 +788,8 @@ class ScreenshotGenerator:
         output_dir: str,
         config_dir: Optional[Path] = None,
         screenshot_id: Optional[str] = None,
+        language: Optional[str] = None,
+        base_language: Optional[str] = None,
     ) -> Optional[ScreenshotConfig]:
         """Convert ScreenshotDefinition to ScreenshotConfig for generation."""
 
@@ -706,8 +800,21 @@ class ScreenshotGenerator:
         # Process all content items to collect images and text
         for item in screenshot_def.content:
             if item.type == "image":
-                # Get source image path, scale, and position
-                asset_path = item.asset or ""
+                # Resolve localized asset path
+                if language and base_language:
+                    # Use localized asset resolution
+                    asset_path = resolve_localized_asset(
+                        item.asset or "", language, base_language, config_dir
+                    )
+                else:
+                    # Non-localized fallback
+                    asset_path = (
+                        item.asset
+                        if isinstance(item.asset, str)
+                        else (item.asset or "")
+                    )
+
+                # Handle absolute vs relative paths
                 if not asset_path:
                     source_image_path = ""
                 elif Path(asset_path).is_absolute():

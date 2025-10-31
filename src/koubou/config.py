@@ -1,7 +1,7 @@
 """Configuration models using Pydantic for type safety and validation."""
 
 from pathlib import Path
-from typing import Dict, List, Literal, Optional, Tuple
+from typing import Dict, List, Literal, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field, model_validator, validator
 
@@ -223,7 +223,19 @@ class ContentItem(BaseModel):
 
     type: Literal["text", "image"] = Field(..., description="Type of content item")
     content: Optional[str] = Field(default=None, description="Text content")
-    asset: Optional[str] = Field(default=None, description="Image asset path")
+    asset: Optional[Union[str, Dict[str, str]]] = Field(
+        default=None,
+        description=(
+            "Image asset path. Supports two formats:\n"
+            "1. String: Simple path or convention-based localized path "
+            "(e.g., 'screenshots/hero.png' resolves to "
+            "'screenshots/{lang}/hero.png')\n"
+            "2. Dict: Explicit per-language paths with optional "
+            "'default' fallback "
+            "(e.g., {'en': 'path/en.png', 'es': 'path/es.png', "
+            "'default': 'path/fallback.png'})"
+        ),
+    )
     position: Tuple[str, str] = Field(
         default=("50%", "50%"), description="Position as percentage or pixels"
     )
@@ -302,6 +314,35 @@ class ContentItem(BaseModel):
                     "When 'stroke_width' is specified, must provide either "
                     "'stroke_color' or 'stroke_gradient'."
                 )
+
+        return v
+
+    @validator("asset")
+    def validate_asset_format(
+        cls, v: Optional[Union[str, Dict[str, str]]]
+    ) -> Optional[Union[str, Dict[str, str]]]:
+        """Validate asset field format."""
+        if v is None:
+            return v
+
+        if isinstance(v, dict):
+            if not v:
+                raise ValueError("Asset dict cannot be empty")
+
+            # Validate keys are valid language codes (2-3 letters or 'default')
+            for key in v.keys():
+                if key != "default" and not (2 <= len(key) <= 3 and key.isalpha()):
+                    raise ValueError(
+                        f"Invalid language code '{key}'. "
+                        "Use 2-3 letter codes (e.g., 'en', 'es', 'pt') or 'default'"
+                    )
+
+            # Validate all values are non-empty strings
+            for lang, path in v.items():
+                if not path or not isinstance(path, str):
+                    raise ValueError(
+                        f"Asset path for '{lang}' must be a non-empty string"
+                    )
 
         return v
 

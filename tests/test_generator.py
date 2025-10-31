@@ -401,3 +401,154 @@ class TestScreenshotGenerator:
         # Result should have RGBA mode to support transparency
         assert result.mode == "RGBA"
         assert result.size == canvas.size
+
+
+class TestResolveLocalizedAsset:
+    """Tests for resolve_localized_asset() function."""
+
+    def setup_method(self):
+        """Setup test method with localized asset structure."""
+        self.temp_dir = Path(tempfile.mkdtemp())
+
+        # Create localized directory structure
+        # screenshots/
+        #   en/
+        #     hero.png
+        #   es/
+        #     hero.png
+        #   hero.png (fallback)
+        self.screenshots_dir = self.temp_dir / "screenshots"
+        self.screenshots_dir.mkdir()
+
+        # Create English version
+        en_dir = self.screenshots_dir / "en"
+        en_dir.mkdir()
+        en_image = Image.new("RGB", (100, 100), (255, 0, 0))
+        en_image.save(en_dir / "hero.png")
+
+        # Create Spanish version
+        es_dir = self.screenshots_dir / "es"
+        es_dir.mkdir()
+        es_image = Image.new("RGB", (100, 100), (0, 255, 0))
+        es_image.save(es_dir / "hero.png")
+
+        # Create fallback version
+        fallback_image = Image.new("RGB", (100, 100), (0, 0, 255))
+        fallback_image.save(self.screenshots_dir / "hero.png")
+
+    def teardown_method(self):
+        """Cleanup after test."""
+        shutil.rmtree(self.temp_dir)
+
+    def test_dict_format_exact_match(self):
+        """Test dict format with exact language match."""
+        from koubou.generator import resolve_localized_asset
+
+        asset = {
+            "en": "path/to/en.png",
+            "es": "path/to/es.png",
+            "default": "path/to/default.png",
+        }
+
+        result = resolve_localized_asset(asset, "en", "en")
+        assert result == "path/to/en.png"
+
+        result = resolve_localized_asset(asset, "es", "en")
+        assert result == "path/to/es.png"
+
+    def test_dict_format_default_fallback(self):
+        """Test dict format falls back to default when language not found."""
+        from koubou.generator import resolve_localized_asset
+
+        asset = {"en": "path/to/en.png", "default": "path/to/default.png"}
+
+        result = resolve_localized_asset(asset, "fr", "en")
+        assert result == "path/to/default.png"
+
+    def test_dict_format_no_match(self):
+        """Test dict format returns empty string when no match found."""
+        from koubou.generator import resolve_localized_asset
+
+        asset = {"en": "path/to/en.png", "es": "path/to/es.png"}
+
+        result = resolve_localized_asset(asset, "fr", "en")
+        assert result == ""
+
+    def test_string_format_lang_convention(self):
+        """Test string format with {lang}/ convention (file exists)."""
+        from koubou.generator import resolve_localized_asset
+
+        asset = "screenshots/hero.png"
+
+        # Should find screenshots/en/hero.png
+        result = resolve_localized_asset(asset, "en", "en", self.temp_dir)
+        assert result == "screenshots/en/hero.png"
+
+        # Should find screenshots/es/hero.png
+        result = resolve_localized_asset(asset, "es", "en", self.temp_dir)
+        assert result == "screenshots/es/hero.png"
+
+    def test_string_format_base_lang_fallback(self):
+        """Test string format falls back to base_language when lang not found."""
+        from koubou.generator import resolve_localized_asset
+
+        asset = "screenshots/hero.png"
+
+        # French not found, should fall back to en
+        result = resolve_localized_asset(asset, "fr", "en", self.temp_dir)
+        assert result == "screenshots/en/hero.png"
+
+    def test_string_format_direct_path_fallback(self):
+        """Test string format falls back to direct path when no localized
+        version found."""
+        from koubou.generator import resolve_localized_asset
+
+        asset = "screenshots/hero.png"
+
+        # Both fr and pt not found, should use direct path
+        result = resolve_localized_asset(asset, "fr", "pt", self.temp_dir)
+        assert result == "screenshots/hero.png"
+
+    def test_empty_asset(self):
+        """Test handling of empty/None asset."""
+        from koubou.generator import resolve_localized_asset
+
+        assert resolve_localized_asset("", "en", "en") == ""
+        assert resolve_localized_asset(None, "en", "en") == ""  # type: ignore
+
+    def test_absolute_path(self):
+        """Test handling of absolute paths."""
+        from koubou.generator import resolve_localized_asset
+
+        # Create absolute path test structure
+        absolute_dir = self.temp_dir / "absolute"
+        absolute_dir.mkdir()
+        en_dir = absolute_dir / "en"
+        en_dir.mkdir()
+        Image.new("RGB", (50, 50), (255, 255, 255)).save(en_dir / "test.png")
+
+        asset = str(absolute_dir / "test.png")
+
+        result = resolve_localized_asset(asset, "en", "en")
+        expected = str(absolute_dir / "en" / "test.png")
+        assert result == expected
+
+    def test_dict_empty(self):
+        """Test empty dict returns empty string."""
+        from koubou.generator import resolve_localized_asset
+
+        asset: dict = {}  # type: ignore
+
+        result = resolve_localized_asset(asset, "en", "en")  # type: ignore
+        assert result == ""
+
+    def test_no_config_dir_relative_path(self):
+        """Test behavior when config_dir is None with relative path."""
+        from koubou.generator import resolve_localized_asset
+
+        asset = "screenshots/hero.png"
+
+        # Without config_dir, should not find files but still return the path
+        result = resolve_localized_asset(asset, "en", "en", None)
+        # Should return direct path as fallback since files don't exist in CWD
+        assert result == asset

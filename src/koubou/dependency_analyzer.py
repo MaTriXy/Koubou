@@ -107,28 +107,42 @@ class DependencyAnalyzer:
             # Scan content items for asset references
             for content_item in screenshot_def.content:
                 if content_item.type == "image" and content_item.asset:
-                    # Create dependency
-                    dependency = AssetDependency(
-                        screenshot_id=screenshot_id,
-                        asset_path=content_item.asset,
-                        asset_type="image",
-                    )
+                    # Handle both string and dict asset formats
+                    asset_paths: List[str] = []
 
-                    # Try to resolve the asset path
-                    if dependency.resolve_path(config_dir):
-                        self.dependencies.append(dependency)
-                        screenshot_assets.append(dependency)
+                    if isinstance(content_item.asset, dict):
+                        # Dict format: collect all unique asset paths
+                        asset_paths = list(set(content_item.asset.values()))
+                    elif isinstance(content_item.asset, str):
+                        # String format: single path
+                        asset_paths = [content_item.asset]
 
-                        # Update mappings - use consistent path resolution
-                        asset_key = str(dependency.resolved_path.resolve())
-                        if asset_key not in self._asset_to_screenshots:
-                            self._asset_to_screenshots[asset_key] = []
-                        self._asset_to_screenshots[asset_key].append(screenshot_id)
-                    else:
-                        logger.warning(
-                            f"Could not resolve asset {content_item.asset} "
-                            f"for screenshot {screenshot_id}"
+                    # Create dependencies for all asset paths
+                    for asset_path in asset_paths:
+                        if not asset_path:  # Skip empty paths
+                            continue
+
+                        dependency = AssetDependency(
+                            screenshot_id=screenshot_id,
+                            asset_path=asset_path,
+                            asset_type="image",
                         )
+
+                        # Try to resolve the asset path
+                        if dependency.resolve_path(config_dir):
+                            self.dependencies.append(dependency)
+                            screenshot_assets.append(dependency)
+
+                            # Update mappings - use consistent path resolution
+                            asset_key = str(dependency.resolved_path.resolve())
+                            if asset_key not in self._asset_to_screenshots:
+                                self._asset_to_screenshots[asset_key] = []
+                            self._asset_to_screenshots[asset_key].append(screenshot_id)
+                        else:
+                            logger.warning(
+                                f"Could not resolve asset {asset_path} "
+                                f"for screenshot {screenshot_id}"
+                            )
 
             self._screenshot_to_assets[screenshot_id] = screenshot_assets
 

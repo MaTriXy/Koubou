@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2025-10-31
+
+### Added
+- Localized asset support with hybrid approach (convention-based and explicit mapping)
+- `resolve_localized_asset()` function for automatic language-specific asset resolution
+- Convention-based asset resolution using `{lang}/` directory pattern
+- Explicit per-language asset mapping with dict format `{"en": "path/en.png", "es": "path/es.png"}`
+- Fallback chain: explicit mapping → lang directory → base_lang directory → direct path
+- Comprehensive unit and integration tests for localized assets
+- Dependency analyzer support for dict-based asset tracking
+
+### Changed
+- `ContentItem.asset` field now accepts both string and dict formats for maximum flexibility
+- Enhanced asset resolution to work seamlessly with multi-language projects
+
 ## [0.8.4] - 2025-10-30
 
 ### Fixed
