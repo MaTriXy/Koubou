@@ -63,7 +63,7 @@ class TestGradientConfig:
 
     def test_invalid_color_format(self):
         """Test that invalid color formats are rejected."""
-        with pytest.raises(ValueError, match="Colors must be in hex format"):
+        with pytest.raises(ValueError, match="must be in hex format"):
             GradientConfig(type="linear", colors=["red", "#00FF00"])
 
     def test_invalid_color_stop_count(self):

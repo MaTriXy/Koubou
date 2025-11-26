@@ -1,6 +1,7 @@
 """Configuration models using Pydantic for type safety and validation."""
 
 import json
+import re
 from pathlib import Path
 from typing import Dict, List, Literal, Optional, Tuple, Union
 
@@ -47,6 +48,27 @@ def resolve_output_size(size: Union[str, Tuple[int, int]]) -> Tuple[int, int]:
     return (width, height)
 
 
+# Hex color validation pattern: #RGB, #RRGGBB, or #RRGGBBAA
+HEX_COLOR_PATTERN = re.compile(r"^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$")
+
+
+def validate_hex_color(color: str, field_name: str = "Color") -> None:
+    """Validate that a color string is a valid hex color.
+
+    Args:
+        color: Color string to validate (e.g., "#FF0000")
+        field_name: Name of the field for error messages
+
+    Raises:
+        ValueError: If color is not a valid hex color
+    """
+    if not HEX_COLOR_PATTERN.match(color):
+        raise ValueError(
+            f"{field_name} must be in hex format: #RGB, #RRGGBB, or #RRGGBBAA "
+            f"(e.g., #FFF, #FFFFFF, or #FFFFFF80). Got: {color}"
+        )
+
+
 class GradientConfig(BaseModel):
     """Universal gradient configuration for text and backgrounds."""
 
@@ -84,9 +106,12 @@ class GradientConfig(BaseModel):
             raise ValueError("At least one color is required")
 
         # Validate color format
-        for color in v:
-            if not color.startswith("#"):
-                raise ValueError("Colors must be in hex format (e.g., #FFFFFF)")
+        for i, color in enumerate(v):
+            try:
+                validate_hex_color(color, f"Color at index {i}")
+            except ValueError as e:
+                # Re-raise with more context
+                raise ValueError(str(e)) from None
         return v
 
     @field_validator("positions")
@@ -174,15 +199,15 @@ class TextOverlay(BaseModel):
     @field_validator("color")
     @classmethod
     def validate_color(cls, v: Optional[str]) -> Optional[str]:
-        if v and not v.startswith("#"):
-            raise ValueError("Colors must be in hex format (e.g., #FFFFFF)")
+        if v:
+            validate_hex_color(v, "Color")
         return v
 
     @field_validator("stroke_color")
     @classmethod
     def validate_stroke_color(cls, v: Optional[str]) -> Optional[str]:
-        if v and not v.startswith("#"):
-            raise ValueError("Stroke colors must be in hex format (e.g., #FFFFFF)")
+        if v:
+            validate_hex_color(v, "Stroke color")
         return v
 
     @field_validator("gradient")
@@ -324,15 +349,15 @@ class ContentItem(BaseModel):
     @field_validator("color")
     @classmethod
     def validate_color_format(cls, v: Optional[str]) -> Optional[str]:
-        if v and not v.startswith("#"):
-            raise ValueError("Colors must be in hex format (e.g., #FFFFFF)")
+        if v:
+            validate_hex_color(v, "Color")
         return v
 
     @field_validator("stroke_color")
     @classmethod
     def validate_stroke_color_format(cls, v: Optional[str]) -> Optional[str]:
-        if v and not v.startswith("#"):
-            raise ValueError("Stroke colors must be in hex format (e.g., #FFFFFF)")
+        if v:
+            validate_hex_color(v, "Stroke color")
         return v
 
     @field_validator("gradient")
