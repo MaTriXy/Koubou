@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **BREAKING**: Migrated from Pydantic v1 to v2 field validators
+- All 19 validators updated to use `@field_validator` with `ValidationInfo`
+- `output_size` now properly converts named sizes (e.g., "iPhone6_9") to tuples before validation
+
+### Fixed
+- **CRITICAL**: Fixed missing f-string prefixes in generator.py logging (2 locations)
+- **CRITICAL**: Added division-by-zero validation for image scaling calculations
+- Fixed iPadPro13 dimensions from 2048x2732 to correct 2064x2752
+- Removed placeholder email from `__init__.py` and `pyproject.toml`
+- Removed broken Read the Docs link from project URLs
+
+### Added
+- Proper hex color validation with regex pattern (#RGB, #RRGGBB, #RRGGBBAA)
+- `validate_hex_color()` helper function with clear error messages
+- Improved error messages for invalid color formats
+
+### Testing
+- All 310 tests passing across Python 3.9, 3.10, 3.11, 3.12
+- All linters passing (black, isort, flake8, mypy)
+- CI/CD pipeline verified and working
+
 ## [0.10.2] - 2025-11-01
 
 ### Fixed
