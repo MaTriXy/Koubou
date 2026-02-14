@@ -73,6 +73,7 @@ class HighlightRenderer:
             shadow_blur = config.get("shadow_blur", 15)
             offset = config.get("shadow_offset", ("0", "6"))
             shadow_offset = (int(offset[0]), int(offset[1]))
+            has_no_fill = fill_color is None
 
             shadow_layer = draw_shadow(
                 canvas.size,
@@ -82,6 +83,8 @@ class HighlightRenderer:
                 shadow_blur=shadow_blur,
                 shadow_offset=shadow_offset,
                 corner_radius=corner_radius,
+                border_only=has_no_fill,
+                border_width=border_width,
             )
             composited = Image.alpha_composite(canvas, shadow_layer)
             canvas.paste(composited)

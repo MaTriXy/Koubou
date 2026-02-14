@@ -79,14 +79,17 @@ class ZoomRenderer:
         disp_y1 = disp_cy + disp_h // 2
         disp_bbox = (disp_x0, disp_y0, disp_x1, disp_y1)
 
-        # Source region indicator
+        # Crop source region BEFORE drawing overlays so they don't appear in the zoom
+        cropped = canvas.crop((src_x0, src_y0, src_x1, src_y1))
+
+        # Source region indicator (drawn after crop)
         source_indicator = config.get("source_indicator", True)
         if source_indicator and border_color:
             self._render_source_indicator(
                 config, canvas, src_bbox, border_color, border_width, corner_radius
             )
 
-        # Draw connector line if requested (behind zoom bubble)
+        # Draw connector line if requested (behind zoom bubble, after crop)
         connector = config.get("connector", False)
         if connector:
             self._render_connector(
@@ -99,9 +102,6 @@ class ZoomRenderer:
                 disp_cx,
                 disp_cy,
             )
-
-        # Crop source region from canvas
-        cropped = canvas.crop((src_x0, src_y0, src_x1, src_y1))
 
         # Resize to display size (zoom effect)
         zoomed = cropped.resize((disp_w, disp_h), Image.Resampling.LANCZOS)
@@ -181,10 +181,14 @@ class ZoomRenderer:
         border_width: int,
         corner_radius: int,
     ) -> None:
-        """Draw an outline on the source region to show where the zoom came from."""
+        """Draw an outline on the source region to show where the zoom came from.
+
+        Source indicator always uses a rounded rectangle since the crop region
+        is always rectangular regardless of the display bubble shape.
+        """
         style = config.get("source_indicator_style", "border")
-        shape = config.get("shape", "circle")
         x0, y0, x1, y1 = src_bbox
+        ind_radius = min(corner_radius, 12)
 
         overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
         draw = ImageDraw.Draw(overlay)
@@ -194,47 +198,25 @@ class ZoomRenderer:
                 *border_color[:3],
                 min(border_color[3] if len(border_color) > 3 else 255, 40),
             )
-            if shape == "circle":
-                draw.ellipse(
-                    [x0, y0, x1, y1],
-                    fill=fill,
-                    outline=border_color,
-                    width=border_width,
-                )
-            elif shape == "rounded_rect":
-                draw.rounded_rectangle(
-                    [x0, y0, x1, y1],
-                    radius=corner_radius,
-                    fill=fill,
-                    outline=border_color,
-                    width=border_width,
-                )
-            else:
-                draw.rectangle(
-                    [x0, y0, x1, y1],
-                    fill=fill,
-                    outline=border_color,
-                    width=border_width,
-                )
+            draw.rounded_rectangle(
+                [x0, y0, x1, y1],
+                radius=ind_radius,
+                fill=fill,
+                outline=border_color,
+                width=border_width,
+            )
         elif style == "dashed":
             self._draw_dashed_rect(
                 draw, src_bbox, border_color, border_width, dash_length=10
             )
         else:
             # Default "border" style
-            if shape == "circle":
-                draw.ellipse([x0, y0, x1, y1], outline=border_color, width=border_width)
-            elif shape == "rounded_rect":
-                draw.rounded_rectangle(
-                    [x0, y0, x1, y1],
-                    radius=corner_radius,
-                    outline=border_color,
-                    width=border_width,
-                )
-            else:
-                draw.rectangle(
-                    [x0, y0, x1, y1], outline=border_color, width=border_width
-                )
+            draw.rounded_rectangle(
+                [x0, y0, x1, y1],
+                radius=ind_radius,
+                outline=border_color,
+                width=border_width,
+            )
 
         composited = Image.alpha_composite(canvas, overlay)
         canvas.paste(composited)

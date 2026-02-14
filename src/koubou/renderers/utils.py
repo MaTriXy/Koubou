@@ -31,9 +31,13 @@ def draw_shadow(
     shadow_blur: int = 15,
     shadow_offset: Tuple[int, int] = (0, 6),
     corner_radius: int = 16,
+    border_only: bool = False,
+    border_width: int = 3,
 ) -> Image.Image:
     """Create a shadow layer for a shape.
 
+    When border_only is True, draws just the outline (for border-only highlights).
+    When False (default), draws a filled shape (for zoom bubbles and filled highlights).
     Returns an RGBA image with the blurred shadow ready for compositing.
     """
     color = parse_color(shadow_color)
@@ -45,12 +49,22 @@ def draw_shadow(
 
     shifted_bbox = [x0 + ox, y0 + oy, x1 + ox, y1 + oy]
 
-    if shape == "circle":
-        draw.ellipse(shifted_bbox, fill=color)
-    elif shape == "rounded_rect":
-        draw.rounded_rectangle(shifted_bbox, radius=corner_radius, fill=color)
+    if border_only:
+        if shape == "circle":
+            draw.ellipse(shifted_bbox, outline=color, width=border_width)
+        elif shape == "rounded_rect":
+            draw.rounded_rectangle(
+                shifted_bbox, radius=corner_radius, outline=color, width=border_width
+            )
+        else:
+            draw.rectangle(shifted_bbox, outline=color, width=border_width)
     else:
-        draw.rectangle(shifted_bbox, fill=color)
+        if shape == "circle":
+            draw.ellipse(shifted_bbox, fill=color)
+        elif shape == "rounded_rect":
+            draw.rounded_rectangle(shifted_bbox, radius=corner_radius, fill=color)
+        else:
+            draw.rectangle(shifted_bbox, fill=color)
 
     shadow = shadow.filter(ImageFilter.GaussianBlur(radius=shadow_blur))
     return shadow
