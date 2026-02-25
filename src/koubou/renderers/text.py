@@ -31,6 +31,24 @@ class TextRenderer:
             TextRenderError: If rendering fails
         """
         try:
+            # Auto-size font if min_font_size and max_height are set
+            if (
+                text_config.min_font_size is not None
+                and text_config.max_width is not None
+                and text_config.max_height is not None
+            ):
+                font_size = self._auto_size_font(
+                    text_config.content,
+                    text_config.font_family,
+                    text_config.font_weight,
+                    text_config.font_size,
+                    text_config.min_font_size,
+                    text_config.max_width,
+                    text_config.max_height,
+                    text_config.line_height,
+                )
+                text_config = text_config.model_copy(update={"font_size": font_size})
+
             # Load font
             font = self._get_font(
                 text_config.font_family, text_config.font_size, text_config.font_weight
@@ -145,6 +163,70 @@ class TextRenderer:
             self.font_cache[cache_key] = font  # type: ignore[index]
 
         return self.font_cache[cache_key]  # type: ignore[index]
+
+    def _auto_size_font(
+        self,
+        text: str,
+        font_family: str,
+        font_weight: str,
+        max_size: int,
+        min_size: int,
+        max_width: int,
+        max_height: int,
+        line_height_multiplier: float,
+    ) -> int:
+        """Find the largest font size where text fits within max_width and max_height.
+
+        Uses binary search over the font size range. At each candidate size, wraps
+        text using _prepare_text and checks whether the total block height
+        (lines * font_size * line_height) fits within max_height. Total height is
+        monotonically non-increasing as font size decreases (smaller glyphs produce
+        fewer or equal wrapped lines), so binary search is valid.
+
+        Args:
+            text: The text content to measure
+            font_family: Font family name
+            font_weight: Font weight (normal, bold)
+            max_size: Starting/maximum font size
+            min_size: Minimum font size floor
+            max_width: Maximum width for text wrapping
+            max_height: Maximum height in pixels for the text block
+            line_height_multiplier: Line height multiplier (e.g. 1.2)
+
+        Returns:
+            The resolved font size (always >= min_size)
+        """
+        low = min_size
+        high = max_size
+        best = min_size
+
+        best_lines = 0
+        best_height = 0
+
+        while low <= high:
+            mid = (low + high) // 2
+            font = self._get_font(font_family, mid, font_weight)
+            lines = self._prepare_text(text, font, max_width, None, None)
+            line_height_px = int(mid * line_height_multiplier)
+            total_height = len(lines) * line_height_px
+
+            if total_height <= max_height:
+                best = mid
+                best_lines = len(lines)
+                best_height = total_height
+                low = mid + 1  # Try larger
+            else:
+                high = mid - 1  # Too tall, try smaller
+
+        if best < max_size:
+            logger.info(
+                f"Auto-sized font: {best}px "
+                f"({best_lines} lines, {best_height}px / {max_height}px max)"
+            )
+        else:
+            logger.info(f"Auto-sized font: {best}px (fits at max size)")
+
+        return best
 
     def _load_safe_default_font(
         self, font_size: int, font_weight: str = "normal"

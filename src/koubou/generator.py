@@ -722,9 +722,9 @@ class ScreenshotGenerator:
         # Get device and output_size from project config
         device = project_config.project.device
         # output_size is validated and always a tuple at runtime
-        output_size: Tuple[int, int] = (
-            project_config.project.output_size  # type: ignore[assignment]
-        )
+        output_size: Tuple[
+            int, int
+        ] = project_config.project.output_size  # type: ignore[assignment]
         logger.info(f"📱 Processing device: {device}")
         logger.info(f"📐 Output size: {output_size}")
 
@@ -1025,12 +1025,10 @@ class ScreenshotGenerator:
                         alignment=getattr(item, "alignment", "center") or "center",
                         anchor="center",  # Use center anchor for
                         # percentage-based positioning
-                        max_width=getattr(
-                            item, "maxWidth", None
-                        ),  # User controls maxWidth, default None means no limit
-                        max_lines=getattr(
-                            item, "maxLines", None
-                        ),  # None means unlimited lines with wrapping
+                        max_width=item.max_width,
+                        max_lines=item.max_lines,
+                        min_font_size=item.min_size,
+                        max_height=item.max_height,
                         stroke_width=getattr(item, "stroke_width", None),
                         stroke_color=getattr(item, "stroke_color", None),
                         stroke_gradient=getattr(item, "stroke_gradient", None),
