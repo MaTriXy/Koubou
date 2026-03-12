@@ -1,21 +1,29 @@
 .PHONY: format lint test install install-dev install-hooks check
 
+VENV_BIN ?= .venv/bin
+BLACK = $(VENV_BIN)/black
+ISORT = $(VENV_BIN)/isort
+FLAKE8 = $(VENV_BIN)/flake8
+MYPY = $(VENV_BIN)/mypy
+PYTEST = $(VENV_BIN)/pytest
+PIP = $(VENV_BIN)/pip
+
 format:
-	black src/ tests/
-	isort src/ tests/
+	$(BLACK) src/ tests/
+	$(ISORT) src/ tests/
 
 lint:
-	flake8 src/ tests/
-	mypy src/
+	$(FLAKE8) src/ tests/
+	$(MYPY) src/
 
 test:
-	pytest -v --cov=src/koubou
+	$(PYTEST) -v --cov=src/koubou
 
 install:
-	pip install -e .
+	$(PIP) install -e .
 
 install-dev:
-	pip install -e ".[dev]"
+	$(PIP) install -e ".[dev]"
 
 install-hooks:
 	git config core.hooksPath .githooks
