@@ -5,6 +5,18 @@ All notable changes to Koubou will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.0] - 2026-03-12
+
+### Added
+- `kou inspect-frame` command to expose real device frame and screen geometry for layout work
+- JSON and table output for frame inspection, including `canvas_class`, safe margins, coverage ratio, and screen bounds
+- CLI tests covering `inspect-frame` with named and custom output sizes
+
+### Changed
+- README and Koubou skill documentation now describe a geometry-aware screenshot workflow
+- Refreshed Undolly HTML example with stronger templates and YAML-driven copy variables
+- Koubou skill guidance now separates hard constraints from strong defaults and taste heuristics to keep creativity flexible
+
 ## [0.15.1] - 2026-03-12
 
 ### Added
