@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 
-import yaml
+import yaml  # type: ignore[import-untyped]
 from rich.console import Console
 
 from .config import ProjectConfig

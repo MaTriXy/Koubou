@@ -5,7 +5,12 @@ All notable changes to Koubou will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.15.0] - 2026-03-12
+
+### Added
+- HTML template rendering mode with Playwright
+- HTML template examples
+- Koubou skill documentation for compatible coding agents
 
 ## [0.14.0] - 2026-02-25
 

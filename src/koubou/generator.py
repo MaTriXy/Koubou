@@ -180,6 +180,7 @@ class ScreenshotGenerator:
 
         alpha_channel = frame_image.split()[-1]
         alpha_pixels = alpha_channel.load()
+        assert alpha_pixels is not None
         fw, fh = frame_image.size
 
         # Flood fill from edges to identify outer transparent area
@@ -307,6 +308,7 @@ class ScreenshotGenerator:
         temp_files: List[str] = []
 
         if should_frame:
+            assert device_frame_name is not None
             for rel_path, abs_path in assets.items():
                 if Path(abs_path).suffix.lower() in (".png", ".jpg", ".jpeg"):
                     framed = self._prerender_framed_asset(abs_path, device_frame_name)
