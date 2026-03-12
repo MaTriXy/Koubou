@@ -1,5 +1,6 @@
 """Tests for CLI functionality."""
 
+import json
 import tempfile
 from pathlib import Path
 
@@ -211,6 +212,51 @@ class TestCLI:
 
         assert result.exit_code == 0
         assert "Available Device Frames" in result.stdout
+
+    def test_inspect_frame_json_output(self):
+        """Test inspect-frame JSON output."""
+        result = self.runner.invoke(
+            app,
+            [
+                "inspect-frame",
+                "iPhone 16 Pro - Black Titanium - Portrait",
+                "--output-size",
+                "iPhone6_9",
+                "--output",
+                "json",
+            ],
+        )
+
+        assert result.exit_code == 0
+        payload = json.loads(result.stdout)
+        assert payload["device"] == "iPhone 16 Pro - Black Titanium - Portrait"
+        assert payload["output_size"] == {"width": 1320, "height": 2868}
+        assert payload["canvas_class"] == "tall_iphone_portrait"
+        assert payload["orientation"] == "portrait"
+        assert "frame_size" in payload
+        assert "screen_bounds" in payload
+        assert "screen_bbox" in payload
+        assert "safe_margins" in payload
+        assert payload["screen_coverage_ratio"] > 0
+
+    def test_inspect_frame_custom_output_size(self):
+        """Test inspect-frame with custom output size parsing."""
+        result = self.runner.invoke(
+            app,
+            [
+                "inspect-frame",
+                "iPhone 16 Pro - Black Titanium - Portrait",
+                "--output-size",
+                "1200x2600",
+                "--output",
+                "json",
+            ],
+        )
+
+        assert result.exit_code == 0
+        payload = json.loads(result.stdout)
+        assert payload["output_size"] == {"width": 1200, "height": 2600}
+        assert payload["canvas_class"] == "tall_iphone_portrait"
 
     def test_setup_html_help(self):
         """Test setup-html help output."""

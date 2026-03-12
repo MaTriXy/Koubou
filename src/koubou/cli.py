@@ -4,7 +4,7 @@ import json
 import logging
 import signal
 from pathlib import Path
-from typing import Optional, Set
+from typing import Any, Optional, Set, Tuple
 
 import typer
 import yaml
@@ -15,7 +15,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from .config import ProjectConfig
+from .config import ProjectConfig, resolve_output_size
 from .exceptions import KoubouError
 from .generator import ScreenshotGenerator
 from .html_setup import (
@@ -225,6 +225,96 @@ def _prepare_html_environment(
     status = check_html_environment()
     if not status.ready:
         raise KoubouError(format_html_environment_error(status))
+
+
+def _parse_output_size_option(value: str) -> Tuple[int, int]:
+    raw = value.strip()
+
+    try:
+        return resolve_output_size(raw)
+    except ValueError:
+        pass
+
+    if "x" in raw.lower():
+        width_str, height_str = raw.lower().split("x", 1)
+        try:
+            return (int(width_str.strip()), int(height_str.strip()))
+        except ValueError as exc:
+            raise typer.BadParameter(
+                "Custom output sizes must look like 1320x2868 or [1320, 2868]"
+            ) from exc
+
+    if raw.startswith("["):
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            raise typer.BadParameter(
+                "Custom output sizes must look like 1320x2868 or [1320, 2868]"
+            ) from exc
+        if (
+            isinstance(parsed, list)
+            and len(parsed) == 2
+            and all(isinstance(item, int) for item in parsed)
+        ):
+            return (parsed[0], parsed[1])
+
+    if "," in raw:
+        width_str, height_str = raw.split(",", 1)
+        try:
+            return (int(width_str.strip()), int(height_str.strip()))
+        except ValueError as exc:
+            raise typer.BadParameter(
+                "Custom output sizes must look like 1320x2868 or [1320, 2868]"
+            ) from exc
+
+    raise typer.BadParameter(
+        f"Unknown output size '{value}'. Use a named size like iPhone6_9 or "
+        "a custom size like 1320x2868."
+    )
+
+
+def _classify_canvas(device: str, output_size: Tuple[int, int]) -> str:
+    width, height = output_size
+    device_lower = device.lower()
+
+    if "mac" in device_lower:
+        return "desktop_like"
+    if "watch" in device_lower:
+        return "watch_portrait" if height >= width else "landscape"
+    if width > height:
+        return "landscape"
+    if "ipad" in device_lower:
+        return "ipad_portrait"
+    if "iphone" in device_lower:
+        aspect_ratio = height / width
+        if aspect_ratio >= 2.1:
+            return "tall_iphone_portrait"
+        return "short_iphone_portrait"
+    return "portrait_generic"
+
+
+def _frame_inspection_payload(
+    *,
+    device: str,
+    output_size: Tuple[int, int],
+    inspection: dict[str, Any],
+) -> dict[str, Any]:
+    width, height = output_size
+    orientation = "landscape" if width > height else "portrait"
+
+    return {
+        "device": device,
+        "output_size": {"width": width, "height": height},
+        "frame_size": inspection["frame_size"],
+        "screen_bounds": inspection["screen_bounds"],
+        "screen_bbox": inspection["screen_bbox"],
+        "screen_ratio": inspection["screen_ratio"],
+        "frame_ratio": inspection["frame_ratio"],
+        "screen_coverage_ratio": inspection["screen_coverage_ratio"],
+        "safe_margins": inspection["safe_margins"],
+        "orientation": orientation,
+        "canvas_class": _classify_canvas(device, output_size),
+    }
 
 
 @app.callback(invoke_without_command=True)
@@ -515,6 +605,111 @@ def list_frames(
         console.print(f"Error listing frames: {e}", style="red")
         if verbose:
             console.print_exception()
+        raise typer.Exit(1)
+
+
+@app.command()
+def inspect_frame(
+    device: str = typer.Argument(..., help="Exact device frame name to inspect"),
+    output_size: str = typer.Option(
+        "iPhone6_9",
+        "--output-size",
+        help="Named App Store size or custom dimensions like 1320x2868",
+    ),
+    output: str = typer.Option(
+        "table", "--output", help="Output format: table or json"
+    ),
+    verbose: bool = typer.Option(False, "--verbose", help="Enable verbose logging"),
+):
+    """Inspect frame geometry for layout and screenshot design decisions."""
+    json_mode = output == "json"
+    output_console = Console(stderr=True) if json_mode else console
+    setup_logging(verbose, log_console=output_console if json_mode else None)
+
+    try:
+        resolved_output_size = _parse_output_size_option(output_size)
+        generator = ScreenshotGenerator()
+        inspection = generator.device_frame_renderer.inspect_frame(device)
+        payload = _frame_inspection_payload(
+            device=device,
+            output_size=resolved_output_size,
+            inspection=inspection,
+        )
+
+        if json_mode:
+            print(json.dumps(payload))
+            return
+
+        summary = Table(
+            title="Frame Inspection",
+            show_header=True,
+            header_style="bold cyan",
+        )
+        summary.add_column("Field", style="green")
+        summary.add_column("Value", style="white")
+
+        summary.add_row("Device", payload["device"])
+        summary.add_row(
+            "Output Size",
+            f'{payload["output_size"]["width"]} x {payload["output_size"]["height"]}',
+        )
+        summary.add_row("Canvas Class", payload["canvas_class"])
+        summary.add_row("Orientation", payload["orientation"])
+        summary.add_row(
+            "Frame Size",
+            f'{payload["frame_size"]["width"]} x {payload["frame_size"]["height"]}',
+        )
+        summary.add_row(
+            "Screen Bounds",
+            (
+                f'x={payload["screen_bounds"]["x"]}, '
+                f'y={payload["screen_bounds"]["y"]}, '
+                f'w={payload["screen_bounds"]["width"]}, '
+                f'h={payload["screen_bounds"]["height"]}'
+            ),
+        )
+        summary.add_row(
+            "Screen BBox",
+            (
+                f'l={payload["screen_bbox"]["left"]}, '
+                f't={payload["screen_bbox"]["top"]}, '
+                f'r={payload["screen_bbox"]["right"]}, '
+                f'b={payload["screen_bbox"]["bottom"]}'
+            ),
+        )
+        summary.add_row(
+            "Safe Margins",
+            (
+                f'l={payload["safe_margins"]["left"]}, '
+                f't={payload["safe_margins"]["top"]}, '
+                f'r={payload["safe_margins"]["right"]}, '
+                f'b={payload["safe_margins"]["bottom"]}'
+            ),
+        )
+        summary.add_row("Frame Ratio", f'{payload["frame_ratio"]:.4f}')
+        summary.add_row("Screen Ratio", f'{payload["screen_ratio"]:.4f}')
+        summary.add_row(
+            "Screen Coverage",
+            f'{payload["screen_coverage_ratio"]:.4f}',
+        )
+
+        console.print(summary)
+        console.print(
+            Panel(
+                "Use this geometry to size typography, crop the device, and avoid "
+                "under-scaled layouts on the real canvas.",
+                title="Layout Tip",
+                border_style="blue",
+            )
+        )
+
+    except typer.BadParameter as e:
+        output_console.print(str(e), style="red")
+        raise typer.Exit(2)
+    except Exception as e:
+        output_console.print(f"Error inspecting frame: {e}", style="red")
+        if verbose:
+            output_console.print_exception()
         raise typer.Exit(1)
 
 

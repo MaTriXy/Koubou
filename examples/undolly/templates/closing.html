@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #1a1035 0%, #0f0f1a 50%, #1a0a2e 100%);
+    padding: 0 6%;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120%;
+    height: 50%;
+    background: radial-gradient(ellipse, rgba(245,158,11,0.08) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 9vh;
+  }
+  h1 {
+    font-size: 14vw;
+    font-weight: 800;
+    color: white;
+    line-height: 1.04;
+    letter-spacing: -0.03em;
+    text-align: center;
+  }
+  h1 span {
+    background: linear-gradient(135deg, #fbbf24, #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .features {
+    display: flex;
+    flex-direction: column;
+    gap: 5vh;
+    width: 100%;
+  }
+  .feature {
+    display: flex;
+    align-items: center;
+    gap: 4vw;
+    padding: 0 2vw;
+  }
+  .feature-accent {
+    width: 1vw;
+    height: 7vh;
+    border-radius: 1vw;
+    background: linear-gradient(180deg, #fbbf24, #f97316);
+    flex-shrink: 0;
+  }
+  .feature-text {
+    text-align: left;
+  }
+  .feature-title {
+    font-size: 6.5vw;
+    font-weight: 700;
+    color: white;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+  .feature-sub {
+    font-size: 4.2vw;
+    font-weight: 400;
+    color: rgba(255,255,255,0.4);
+    margin-top: 0.4vh;
+  }
+</style>
+</head>
+<body>
+  <div class="content">
+    <h1>{{headline_line_1}}<br><span>{{headline_accent}}</span></h1>
+    <div class="features">
+      <div class="feature">
+        <div class="feature-accent"></div>
+        <div class="feature-text">
+          <div class="feature-title">{{feature_1_title}}</div>
+          <div class="feature-sub">{{feature_1_subtitle}}</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-accent"></div>
+        <div class="feature-text">
+          <div class="feature-title">{{feature_2_title}}</div>
+          <div class="feature-sub">{{feature_2_subtitle}}</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-accent"></div>
+        <div class="feature-text">
+          <div class="feature-title">{{feature_3_title}}</div>
+          <div class="feature-sub">{{feature_3_subtitle}}</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-accent"></div>
+        <div class="feature-text">
+          <div class="feature-title">{{feature_4_title}}</div>
+          <div class="feature-sub">{{feature_4_subtitle}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

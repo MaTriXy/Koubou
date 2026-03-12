@@ -272,6 +272,111 @@ class DeviceFrameRenderer:
         except DeviceFrameError:
             return None
 
+    def inspect_frame(self, frame_name: str) -> Dict[str, Any]:
+        """Return geometry details for a device frame.
+
+        The returned data is intended for layout tooling and agents that need
+        objective information about the frame, screen area, and safe margins.
+        """
+        frame_image = self._load_frame_image(frame_name)
+        frame_info = self._get_frame_info(frame_name)
+        frame_width, frame_height = frame_image.size
+
+        screen_mask = self.generate_screen_mask_from_image(frame_image)
+        screen_bbox = self._mask_to_bbox(screen_mask)
+        screen_bounds = self._resolve_screen_bounds(
+            frame_info=frame_info,
+            frame_size=(frame_width, frame_height),
+            fallback_bbox=screen_bbox,
+        )
+        safe_margins = self._build_safe_margins(
+            frame_size=(frame_width, frame_height),
+            screen_bbox=screen_bbox,
+        )
+        screen_coverage_ratio = self._mask_coverage_ratio(screen_mask)
+
+        return {
+            "frame_size": {"width": frame_width, "height": frame_height},
+            "screen_bounds": screen_bounds,
+            "screen_bbox": screen_bbox,
+            "screen_ratio": round(screen_bounds["width"] / screen_bounds["height"], 4),
+            "frame_ratio": round(frame_width / frame_height, 4),
+            "screen_coverage_ratio": round(screen_coverage_ratio, 4),
+            "safe_margins": safe_margins,
+        }
+
+    def _mask_to_bbox(self, mask: Image.Image) -> Dict[str, int]:
+        bbox = mask.getbbox()
+        if bbox is None:
+            raise DeviceFrameError("Unable to determine screen bounding box")
+
+        left, top, right, bottom = bbox
+        return {
+            "left": int(left),
+            "top": int(top),
+            "right": int(right),
+            "bottom": int(bottom),
+            "width": int(right - left),
+            "height": int(bottom - top),
+        }
+
+    def _resolve_screen_bounds(
+        self,
+        *,
+        frame_info: Optional[Dict[str, Any]],
+        frame_size: Tuple[int, int],
+        fallback_bbox: Dict[str, int],
+    ) -> Dict[str, int]:
+        frame_width, frame_height = frame_size
+
+        if frame_info and "screen_bounds" in frame_info:
+            screen_bounds = frame_info["screen_bounds"]
+            return {
+                "x": int(screen_bounds.get("x", fallback_bbox["left"])),
+                "y": int(screen_bounds.get("y", fallback_bbox["top"])),
+                "width": int(screen_bounds.get("width", fallback_bbox["width"])),
+                "height": int(screen_bounds.get("height", fallback_bbox["height"])),
+            }
+
+        if frame_info and "x" in frame_info and "y" in frame_info:
+            x = int(frame_info.get("x", fallback_bbox["left"]))
+            y = int(frame_info.get("y", fallback_bbox["top"]))
+            return {
+                "x": x,
+                "y": y,
+                "width": int(frame_width - (x * 2)),
+                "height": int(frame_height - (y * 2)),
+            }
+
+        return {
+            "x": fallback_bbox["left"],
+            "y": fallback_bbox["top"],
+            "width": fallback_bbox["width"],
+            "height": fallback_bbox["height"],
+        }
+
+    def _build_safe_margins(
+        self,
+        *,
+        frame_size: Tuple[int, int],
+        screen_bbox: Dict[str, int],
+    ) -> Dict[str, int]:
+        frame_width, frame_height = frame_size
+        return {
+            "left": screen_bbox["left"],
+            "top": screen_bbox["top"],
+            "right": int(frame_width - screen_bbox["right"]),
+            "bottom": int(frame_height - screen_bbox["bottom"]),
+        }
+
+    def _mask_coverage_ratio(self, mask: Image.Image) -> float:
+        histogram = mask.histogram()
+        weighted_pixels = sum(value * count for value, count in enumerate(histogram))
+        total_pixels = mask.size[0] * mask.size[1]
+        if total_pixels == 0:
+            return 0.0
+        return weighted_pixels / (255 * total_pixels)
+
     def generate_screen_mask(self, frame_name: str) -> Image.Image:
         """Generate a screen mask using frame boundary detection.
 

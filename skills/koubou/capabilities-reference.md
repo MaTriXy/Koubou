@@ -229,6 +229,10 @@ kou list-frames
 kou list-frames "iPhone 16"
 kou list-frames "iPad" --output json
 
+# Inspect frame geometry for layout work
+kou inspect-frame "iPhone 16 Pro - Black Titanium - Portrait" --output-size iPhone6_9
+kou inspect-frame "iPhone 16 Pro - Black Titanium - Portrait" --output-size iPhone6_9 --output json
+
 # Create sample config
 kou --create-config sample.yaml
 kou --create-config sample.yaml --name "My App" --force

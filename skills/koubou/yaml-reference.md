@@ -31,6 +31,10 @@ project:
 
 `output_size` accepts named sizes or custom `[width, height]` arrays. See sizes table below.
 
+Design implication:
+- The skill should read `project.device` and `project.output_size` before writing templates. Typography scale, layout density, and device crop should adapt to this canvas instead of using one fixed CSS recipe.
+- The skill should run `kou inspect-frame "<device>" --output-size <size> --output json` and use the returned geometry instead of estimating screen area and margins by eye.
+
 ## Screenshots section
 
 Each key under `screenshots:` is a screenshot ID (used as filename).
@@ -234,6 +238,7 @@ kou list-frames                    # All available frames (100+)
 kou list-frames "iPhone 16"        # Filter by search term
 kou list-frames "iPad"             # iPad frames
 kou list-frames --output json      # Machine-readable
+kou inspect-frame "iPhone 16 Pro - Black Titanium - Portrait" --output-size iPhone6_9 --output json
 ```
 
 Device names must match exactly as shown by `kou list-frames`.

@@ -1,5 +1,5 @@
 project:
-  name: "Undolly - HTML Template Example"
+  name: "Undolly"
   output_dir: "output"
   device: "iPhone 16 Pro - Black Titanium - Portrait"
   output_size: "iPhone6_9"
@@ -8,35 +8,46 @@ screenshots:
   01_hero:
     template: "templates/hero.html"
     variables:
-      headline: "Free Up Space Fast"
-      subtitle: "Clear similar photos in minutes"
+      headline_accent: "Gigabytes"
+      headline_rest: "Back"
+      headline_tail: "in Minutes"
+      subtitle: "Clean similar photos fast"
     assets:
       app_screenshot: "screenshots/home_dashboard.png"
 
-  02_find_duplicates:
-    template: "templates/feature.html"
+  02_best_shot:
+    template: "templates/side_feature.html"
     variables:
-      headline: "Compare Similar Shots"
-      subtitle: "Keep one and delete the rest"
+      headline_prefix: "The"
+      headline_accent: "Best"
+      headline_suffix: "Shot"
+      headline_tail: "Stays"
+      subtitle: "Smart picks, you decide"
     assets:
       app_screenshot: "screenshots/group_clean.png"
 
-  03_smart_analysis:
-    template: "templates/analysis.html"
+  03_details:
+    template: "templates/feature_top.html"
     variables:
-      headline: "Keep Only The Best"
-      subtitle: "Sharpness, framing, and eyes open"
+      headline_line_1: "See"
+      headline_accent: "Every"
+      headline_line_3: "Detail"
+      subtitle_line_1: "Full metadata"
+      subtitle_line_2: "at a glance"
     assets:
       app_screenshot: "screenshots/group_detailed.png"
 
-  04_more_features:
-    template: "templates/features_list.html"
+  04_closing:
+    template: "templates/closing.html"
     frame: false
     variables:
-      headline: "Clean The Whole Library"
-      feature_1: "Similar Photos"
-      feature_2: "Big Videos"
-      feature_3: "Screenshots"
-      feature_4: "WhatsApp Media"
-      feature_5: "Best Shot"
-      feature_6: "Framing"
+      headline_line_1: "Clean"
+      headline_accent: "Everything"
+      feature_1_title: "Similar Photos"
+      feature_1_subtitle: "Find near-duplicates"
+      feature_2_title: "Big Videos"
+      feature_2_subtitle: "Reclaim gigabytes"
+      feature_3_title: "Chat Media"
+      feature_3_subtitle: "WhatsApp clutter"
+      feature_4_title: "Screenshots"
+      feature_4_subtitle: "Old captures gone"

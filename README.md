@@ -90,6 +90,9 @@ kou generate my-screenshots.yaml
 # Prepare HTML rendering if your project uses HTML templates
 kou setup-html
 
+# Inspect real frame geometry before designing HTML layouts
+kou inspect-frame "iPhone 16 Pro - Black Titanium - Portrait" --output-size iPhone6_9
+
 # Live editing mode - regenerate automatically when files change
 kou live my-screenshots.yaml
 ```
@@ -112,6 +115,7 @@ screenshots:
 - `assets:` are file-path substitutions exposed to the template as `{{key}}`
 - `kou generate config.yaml --setup-html` prepares HTML rendering and generates in one run
 - `kou live config.yaml --setup-html` does the same before starting live mode
+- `kou inspect-frame "<device>" --output-size <size> --output json` exposes frame and screen geometry for layout decisions
 
 ## 🔄 Live Editing
 
@@ -341,6 +345,7 @@ See the YAML API Reference below for all available options including gradients, 
 - `kou generate <config.yaml>` - Generate screenshots from configuration
 - `kou setup-html` - Prepare HTML rendering support for the current installation
 - `kou live <config.yaml>` - Live editing mode with real-time regeneration
+- `kou inspect-frame "<device>" --output-size <size>` - Inspect real frame and screen geometry for layout decisions
 - `kou list-sizes` - List available App Store screenshot sizes
 - `kou --create-config <output.yaml>` - Create a sample configuration file
 - `kou --version` - Show version information
@@ -367,6 +372,18 @@ kou setup-html
 
 # See setup diagnostics
 kou setup-html --verbose
+```
+
+#### Frame Inspection
+```bash
+# Human-readable geometry summary
+kou inspect-frame "iPhone 16 Pro - Black Titanium - Portrait" --output-size iPhone6_9
+
+# Machine-readable output for agents or tooling
+kou inspect-frame "iPhone 16 Pro - Black Titanium - Portrait" --output-size iPhone6_9 --output json
+
+# Custom canvas size
+kou inspect-frame "iPhone 16 Pro - Black Titanium - Portrait" --output-size 1200x2600 --output json
 ```
 
 #### Live Editing Command
