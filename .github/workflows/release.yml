@@ -7,7 +7,7 @@ on:
 
 permissions:
   contents: write
-  actions: read
+  actions: write
   id-token: write
 
 jobs:
@@ -111,5 +111,39 @@ jobs:
         TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
       run: |
         twine upload dist/*.tar.gz dist/*.whl
-      continue-on-error: true
+
+    - name: Wait for PyPI source distribution
+      env:
+        SDIST_URL: https://files.pythonhosted.org/packages/source/k/koubou/koubou-${{ steps.tag.outputs.version }}.tar.gz
+      run: |
+        python - <<'PY'
+        import os
+        import time
+        import urllib.request
+
+        url = os.environ["SDIST_URL"]
+        attempts = 18
+        delay_seconds = 10
+
+        for attempt in range(1, attempts + 1):
+            try:
+                with urllib.request.urlopen(url, timeout=10) as response:
+                    if response.status == 200:
+                        print(f"PyPI artifact ready: {url}")
+                        break
+            except Exception as exc:
+                print(
+                    f"Attempt {attempt}/{attempts} waiting for {url}: {exc}",
+                    flush=True,
+                )
+            time.sleep(delay_seconds)
+        else:
+            raise SystemExit(f"Timed out waiting for PyPI artifact: {url}")
+        PY
+
+    - name: Trigger Homebrew workflow
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh workflow run Homebrew --ref main -f tag-name=${{ steps.tag.outputs.tag }}
         
