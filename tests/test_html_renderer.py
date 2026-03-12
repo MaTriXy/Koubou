@@ -21,9 +21,18 @@ def _playwright_available():
     return importlib.util.find_spec("playwright") is not None
 
 
+def _html_runtime_available():
+    if not _playwright_available():
+        return False
+
+    from koubou.html_setup import check_html_environment
+
+    return check_html_environment().ready
+
+
 requires_playwright = pytest.mark.skipif(
-    not _playwright_available(),
-    reason="playwright not installed (install with: pip install koubou[html])",
+    not _html_runtime_available(),
+    reason="HTML rendering runtime not available in test environment",
 )
 
 
@@ -86,7 +95,8 @@ class TestHtmlRenderer:
 
     def test_basic_html_rendering(self, temp_dir, renderer):
         template = temp_dir / "test.html"
-        template.write_text("""<!DOCTYPE html>
+        template.write_text(
+            """<!DOCTYPE html>
 <html>
 <body style="margin:0; background: linear-gradient(135deg, #667eea, #764ba2);
              width:100vw; height:100vh;">
@@ -94,7 +104,8 @@ class TestHtmlRenderer:
     {{headline}}
   </h1>
 </body>
-</html>""")
+</html>"""
+        )
 
         png_bytes = renderer.render(
             template_path=template,
@@ -108,13 +119,15 @@ class TestHtmlRenderer:
 
     def test_variable_substitution(self, temp_dir, renderer):
         template = temp_dir / "vars.html"
-        template.write_text("""<!DOCTYPE html>
+        template.write_text(
+            """<!DOCTYPE html>
 <html>
 <body style="margin:0; width:100vw; height:100vh; background:#fff;">
   <p id="title">{{title}}</p>
   <p id="sub">{{subtitle}}</p>
 </body>
-</html>""")
+</html>"""
+        )
 
         png_bytes = renderer.render(
             template_path=template,
@@ -129,12 +142,14 @@ class TestHtmlRenderer:
         img.save(asset_path)
 
         template = temp_dir / "asset.html"
-        template.write_text("""<!DOCTYPE html>
+        template.write_text(
+            """<!DOCTYPE html>
 <html>
 <body style="margin:0; width:100vw; height:100vh; background:#000;">
   <img src="screen.png" style="width:50px; height:50px;">
 </body>
-</html>""")
+</html>"""
+        )
 
         png_bytes = renderer.render(
             template_path=template,
@@ -156,13 +171,15 @@ class TestHtmlRenderer:
         logo.save(tpl_dir / "logo.png")
 
         template = tpl_dir / "hero.html"
-        template.write_text("""<!DOCTYPE html>
+        template.write_text(
+            """<!DOCTYPE html>
 <html>
 <head><link rel="stylesheet" href="styles.css"></head>
 <body style="width:100vw; height:100vh;">
   <img src="logo.png" style="width:50px; height:50px;">
 </body>
-</html>""")
+</html>"""
+        )
 
         png_bytes = renderer.render(
             template_path=template,
@@ -178,14 +195,16 @@ class TestHtmlRenderer:
         from koubou.generator import ScreenshotGenerator
 
         template = temp_dir / "hero.html"
-        template.write_text("""<!DOCTYPE html>
+        template.write_text(
+            """<!DOCTYPE html>
 <html>
 <body style="margin:0; background:#1a1a2e; width:100vw; height:100vh;">
   <h1 style="color:white; text-align:center; padding-top:40%;">
     {{headline}}
   </h1>
 </body>
-</html>""")
+</html>"""
+        )
 
         output_dir = temp_dir / "output"
 
