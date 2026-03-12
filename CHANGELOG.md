@@ -5,6 +5,18 @@ All notable changes to Koubou will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.1] - 2026-03-12
+
+### Added
+- `kou setup-html` command to prepare HTML rendering support in the current Koubou installation
+- `--setup-html` flag for `kou generate` and `kou live`
+- HTML environment checks and setup tests
+
+### Changed
+- Playwright is now installed as part of the base package instead of requiring a separate HTML extra
+- HTML renderer errors now guide users to `kou setup-html` instead of `pip install ...`
+- README and skill documentation now describe the built-in HTML setup flow for PyPI and Homebrew users
+
 ## [0.15.0] - 2026-03-12
 
 ### Added
