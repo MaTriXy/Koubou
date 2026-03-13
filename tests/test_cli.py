@@ -1,14 +1,35 @@
 """Tests for CLI functionality."""
 
+import importlib
 import json
 import tempfile
 from pathlib import Path
 
+import pytest
 import yaml
 from PIL import Image
 from typer.testing import CliRunner
 
 from koubou.cli import app
+
+
+def _playwright_available():
+    return importlib.util.find_spec("playwright") is not None
+
+
+def _html_runtime_available():
+    if not _playwright_available():
+        return False
+
+    from koubou.html_setup import check_html_environment
+
+    return check_html_environment().ready
+
+
+requires_html_runtime = pytest.mark.skipif(
+    not _html_runtime_available(),
+    reason="HTML rendering runtime not available in test environment",
+)
 
 
 class TestCLI:
@@ -53,12 +74,96 @@ class TestCLI:
 
         assert config["project"]["name"] == "Test Project"
         assert config["project"]["output_dir"] == "Screenshots/Generated"
-        assert config["project"]["device"] == "iPhone 15 Pro Portrait"
+        assert (
+            config["project"]["device"] == "iPhone 16 Pro - Black Titanium - Portrait"
+        )
         assert config["project"]["output_size"] == "iPhone6_9"
         assert "screenshots" in config
         assert (
             len(config["screenshots"]) == 3
         )  # Updated CLI generates 3 sample screenshots
+        assert (self.temp_dir / "screenshots" / "home.png").exists()
+        assert (self.temp_dir / "screenshots" / "features.png").exists()
+        assert (self.temp_dir / "screenshots" / "gradient_demo.png").exists()
+
+    def test_create_config_sample_generates_successfully(self):
+        """Sample config should generate successfully without manual asset setup."""
+        config_path = self.temp_dir / "sample_config.yaml"
+
+        create_result = self.runner.invoke(
+            app, ["--create-config", str(config_path), "--name", "Sample Project"]
+        )
+        assert create_result.exit_code == 0
+
+        generate_result = self.runner.invoke(app, ["generate", str(config_path)])
+
+        assert generate_result.exit_code == 0
+        output_files = list(
+            (self.temp_dir / "Screenshots" / "Generated").glob("**/*.png")
+        )
+        assert len(output_files) == 3
+
+    def test_create_config_html_mode_creates_templates(self):
+        """HTML mode should scaffold templates and template-based YAML."""
+        config_path = self.temp_dir / "sample_html_config.yaml"
+
+        result = self.runner.invoke(
+            app,
+            [
+                "--create-config",
+                str(config_path),
+                "--mode",
+                "html",
+                "--name",
+                "HTML Sample Project",
+            ],
+        )
+
+        assert result.exit_code == 0
+        assert config_path.exists()
+        assert (self.temp_dir / "templates" / "hero.html").exists()
+        assert (self.temp_dir / "templates" / "feature.html").exists()
+        assert (self.temp_dir / "templates" / "closing.html").exists()
+        assert (self.temp_dir / "templates" / "styles.css").exists()
+
+        with open(config_path) as f:
+            config = yaml.safe_load(f)
+
+        assert (
+            config["project"]["device"] == "iPhone 16 Pro - Black Titanium - Portrait"
+        )
+        assert config["screenshots"]["hero"]["template"] == "templates/hero.html"
+        assert (
+            config["screenshots"]["hero"]["assets"]["screen"] == "screenshots/home.png"
+        )
+
+    @requires_html_runtime
+    def test_create_config_html_mode_generates_successfully(self):
+        """HTML sample config should render successfully with setup-html."""
+        config_path = self.temp_dir / "sample_html_config.yaml"
+
+        create_result = self.runner.invoke(
+            app,
+            [
+                "--create-config",
+                str(config_path),
+                "--mode",
+                "html",
+                "--name",
+                "HTML Sample Project",
+            ],
+        )
+        assert create_result.exit_code == 0
+
+        generate_result = self.runner.invoke(
+            app, ["generate", str(config_path), "--setup-html"]
+        )
+
+        assert generate_result.exit_code == 0
+        output_files = list(
+            (self.temp_dir / "Screenshots" / "Generated").glob("**/*.png")
+        )
+        assert len(output_files) == 3
 
     def test_help_when_no_arguments(self):
         """Test help is shown when no arguments provided."""
