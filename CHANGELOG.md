@@ -5,6 +5,24 @@ All notable changes to Koubou will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.17.0] - 2026-03-13
+
+### Added
+- **Live preview dashboard for `kou live`**: Koubou now opens a local browser dashboard during live mode, showing screenshots in YAML order with per-slide hot reload.
+- **Mixed preview support**: HTML screenshots render as live iframes while standard Koubou screenshots render as regenerated PNG previews in the same dashboard.
+- **HTML preview staging**: Shared HTML staging now powers both the browser dashboard and final Playwright exports, keeping template siblings, generated assets, and live previews aligned.
+- **Mac App Store desktop presets**: Added named `output_size` values for `AppDesktop_1280`, `AppDesktop_1440`, `AppDesktop_2560`, and `AppDesktop_2880`.
+- **HTML project scaffolding**: `kou --create-config --mode html` now generates a runnable HTML sample project with `templates/` and sample assets.
+
+### Changed
+- `kou --create-config` now creates sample PNG assets alongside the generated YAML, so the default sample project works immediately without manual asset setup.
+- `kou live` now provides a consistent preview experience for both HTML templates and the standard content pipeline.
+- README and YAML API docs now document the live preview dashboard, mixed preview behavior, and the new `--mode html` sample workflow.
+
+### Testing
+- 388 tests passing
+- Added coverage for the live preview dashboard, recursive HTML asset tracking, generated sample configs, and end-to-end HTML sample scaffolding
+
 ## [0.16.0] - 2026-03-12
 
 ### Added
