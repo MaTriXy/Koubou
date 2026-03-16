@@ -5,6 +5,11 @@ All notable changes to Koubou will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.17.1] - 2026-03-16
+
+### Fixed
+- Device frame renderer logs now interpolate actual frame names, variants, and screen bounds instead of literal placeholder text when metadata lookup falls back or mask generation runs.
+
 ## [0.17.0] - 2026-03-13
 
 ### Added
