@@ -813,6 +813,61 @@ def setup_html(
 
 
 @app.command()
+def setup_frames(
+    force: bool = typer.Option(
+        False, "--force", help="Re-download frames even if already cached"
+    ),
+    verbose: bool = typer.Option(False, "--verbose", help="Enable verbose logging"),
+):
+    """Download device frame images for screenshot generation."""
+    from .frame_manager import (
+        FRAMES_CACHE_DIR,
+        download_frames,
+        get_bundled_frames_path,
+        get_cached_frames_path,
+    )
+
+    setup_logging(verbose)
+
+    try:
+        if not force:
+            bundled = get_bundled_frames_path()
+            if bundled:
+                console.print(
+                    f"Frames ready: using bundled frames at {bundled}", style="green"
+                )
+                return
+
+            cached = get_cached_frames_path()
+            if cached:
+                console.print(
+                    f"Frames ready: using cached frames at {cached}", style="green"
+                )
+                return
+
+        if force:
+            from . import __version__
+
+            cache_path = FRAMES_CACHE_DIR / __version__
+            if cache_path.exists():
+                import shutil
+
+                shutil.rmtree(cache_path)
+
+        path = download_frames(verbose=True)
+        console.print(f"Frames ready: downloaded to {path}", style="green")
+
+    except KoubouError as e:
+        console.print(f"{e}", style="red")
+        raise typer.Exit(1)
+    except Exception as e:
+        console.print(f"{e}", style="red")
+        if verbose:
+            console.print_exception()
+        raise typer.Exit(1)
+
+
+@app.command()
 def list_sizes(
     output: str = typer.Option(
         "table", "--output", help="Output format: table or json"

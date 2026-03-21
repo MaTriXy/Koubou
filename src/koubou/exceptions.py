@@ -53,3 +53,9 @@ class ZoomRenderError(RenderError):
     """Raised when there's an error rendering zoom callouts."""
 
     pass
+
+
+class FramesNotAvailableError(KoubouError):
+    """Raised when device frames cannot be found or downloaded."""
+
+    pass

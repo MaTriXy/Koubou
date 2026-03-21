@@ -19,7 +19,13 @@ except Exception:
 __author__ = "David Collado"
 
 from .config import GradientConfig, ScreenshotConfig, TextOverlay
-from .exceptions import ConfigurationError, KoubouError, RenderError, TextGradientError
+from .exceptions import (
+    ConfigurationError,
+    FramesNotAvailableError,
+    KoubouError,
+    RenderError,
+    TextGradientError,
+)
 from .generator import ScreenshotGenerator
 
 __all__ = [
@@ -31,4 +37,5 @@ __all__ = [
     "ConfigurationError",
     "RenderError",
     "TextGradientError",
+    "FramesNotAvailableError",
 ]

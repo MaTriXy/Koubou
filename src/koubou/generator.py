@@ -148,8 +148,10 @@ class ScreenshotGenerator:
         self._load_frame_metadata()
 
     def _get_bundled_frames_path(self) -> Path:
-        """Get path to bundled device frames."""
-        return Path(__file__).parent / "frames"
+        """Get path to device frames, downloading if necessary."""
+        from .frame_manager import ensure_frames
+
+        return ensure_frames()
 
     def _load_frame_metadata(self) -> None:
         """Load device frame metadata from JSON files."""

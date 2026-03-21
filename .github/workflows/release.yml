@@ -37,6 +37,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install build wheel twine
 
+    - name: Create frames tarball
+      run: |
+        mkdir -p dist
+        tar -czf dist/frames-${{ steps.tag.outputs.tag }}.tar.gz \
+          -C src/koubou/frames .
+
     - name: Build package
       run: python -m build
 
@@ -110,7 +116,7 @@ jobs:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
       run: |
-        twine upload dist/*.tar.gz dist/*.whl
+        twine upload dist/koubou-*.tar.gz dist/koubou-*.whl
 
     - name: Wait for PyPI source distribution
       env:
