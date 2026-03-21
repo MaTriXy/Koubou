@@ -5,6 +5,18 @@ All notable changes to Koubou will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.0] - 2026-03-21
+
+### Added
+- **iPhone 17 device frames**: iPhone 17, 17 Pro, 17 Pro Max, and iPhone Air in all available colors (portrait and landscape)
+- **New App Store screenshot sizes**: `iPhone6_3` (1206×2622) for iPhone 17/17 Pro, `iPhone6_9_alt` (1260×2736) for iPhone Air
+- **Apple Watch Ultra 2 & Ultra 3 frames**: Full set of band variants for both Black and Natural titanium finishes
+- **Apple Watch S11 frames**: 42mm and 46mm sizes with Aluminum and Titanium finishes across all band options
+- **iPhone 16 Plus frames**: All five colors (Black, Pink, Teal, Ultramarine, White) in portrait and landscape
+- **Apple TV 4K frame**
+- **MacBook frames**: MacBook Air 13" 4th Gen Midnight, MacBook Pro M4 14" and 16" Silver
+- Device frame renderer now handles single-segment model names (e.g., "17", "Air") for the new iPhone naming scheme
+
 ## [0.17.1] - 2026-03-16
 
 ### Fixed
