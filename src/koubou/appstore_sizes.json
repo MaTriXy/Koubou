@@ -2,17 +2,27 @@
   "iPhone6_9": {
     "width": 1320,
     "height": 2868,
-    "description": "iPhone 16 Pro Max, 15 Pro Max (6.9\")"
+    "description": "iPhone 17 Pro Max, 16 Pro Max, 15 Pro Max (6.9\")"
+  },
+  "iPhone6_9_alt": {
+    "width": 1260,
+    "height": 2736,
+    "description": "iPhone Air (6.9\" alt)"
   },
   "iPhone6_7": {
     "width": 1290,
     "height": 2796,
-    "description": "iPhone 15/14/13/12 Pro Max, Plus (6.7\")"
+    "description": "iPhone 16 Plus, 15/14/13/12 Pro Max, Plus (6.7\")"
   },
   "iPhone6_5": {
     "width": 1242,
     "height": 2688,
     "description": "iPhone 11 Pro Max, XS Max (6.5\")"
+  },
+  "iPhone6_3": {
+    "width": 1206,
+    "height": 2622,
+    "description": "iPhone 17, 17 Pro (6.3\")"
   },
   "iPhone6_1": {
     "width": 1179,

@@ -26,6 +26,21 @@
       "x": "330",
       "y": "218",
       "name": "MacBook Air 2022"
+    },
+    "MacBook Air M3 13": {
+      "x": "330",
+      "y": "218",
+      "name": "MacBook Air 13\" - 4th Gen - Midnight"
+    },
+    "MacBook Pro M4 14": {
+      "x": "460",
+      "y": "300",
+      "name": "MacBook Pro M4 14-inch Silver"
+    },
+    "MacBook Pro M4 16": {
+      "x": "442",
+      "y": "313",
+      "name": "MacBook Pro M4 16-inch Silver"
     }
   },
   "iPhone": {
@@ -164,6 +179,180 @@
           "x": "80",
           "name": "iPhone 16 - Ultramarine - Portrait",
           "appstore_device_type": "IPHONE_69"
+        }
+      }
+    },
+    "17": {
+      "Black": {
+        "Portrait": {
+          "x": "72",
+          "y": "69",
+          "name": "iPhone 17 - Black - Portrait",
+          "appstore_device_type": "IPHONE_69"
+        }
+      },
+      "White": {
+        "Portrait": {
+          "x": "72",
+          "y": "69",
+          "name": "iPhone 17 - White - Portrait",
+          "appstore_device_type": "IPHONE_69"
+        }
+      },
+      "Mist Blue": {
+        "Portrait": {
+          "x": "72",
+          "y": "69",
+          "name": "iPhone 17 - Mist Blue - Portrait",
+          "appstore_device_type": "IPHONE_69"
+        }
+      },
+      "Sage": {
+        "Portrait": {
+          "x": "72",
+          "y": "69",
+          "name": "iPhone 17 - Sage - Portrait",
+          "appstore_device_type": "IPHONE_69"
+        }
+      },
+      "Lavender": {
+        "Portrait": {
+          "x": "72",
+          "y": "69",
+          "name": "iPhone 17 - Lavender - Portrait",
+          "appstore_device_type": "IPHONE_69"
+        }
+      }
+    },
+    "17 Pro": {
+      "Pro": {
+        "Silver": {
+          "Portrait": {
+            "x": "72",
+            "y": "69",
+            "name": "iPhone 17 Pro - Silver - Portrait",
+            "appstore_device_type": "IPHONE_69"
+          }
+        },
+        "Deep Blue": {
+          "Portrait": {
+            "x": "72",
+            "y": "69",
+            "name": "iPhone 17 Pro - Deep Blue - Portrait",
+            "appstore_device_type": "IPHONE_69"
+          }
+        },
+        "Cosmic Orange": {
+          "Portrait": {
+            "x": "72",
+            "y": "69",
+            "name": "iPhone 17 Pro - Cosmic Orange - Portrait",
+            "appstore_device_type": "IPHONE_69"
+          }
+        }
+      },
+      "Pro Max": {
+        "Silver": {
+          "Portrait": {
+            "x": "75",
+            "y": "66",
+            "name": "iPhone 17 Pro Max - Silver - Portrait",
+            "appstore_device_type": "IPHONE_69"
+          }
+        },
+        "Deep Blue": {
+          "Portrait": {
+            "x": "75",
+            "y": "66",
+            "name": "iPhone 17 Pro Max - Deep Blue - Portrait",
+            "appstore_device_type": "IPHONE_69"
+          }
+        },
+        "Cosmic Orange": {
+          "Portrait": {
+            "x": "75",
+            "y": "66",
+            "name": "iPhone 17 Pro Max - Cosmic Orange - Portrait",
+            "appstore_device_type": "IPHONE_69"
+          }
+        }
+      }
+    },
+    "Air": {
+      "Space Black": {
+        "Portrait": {
+          "x": "60",
+          "y": "72",
+          "name": "iPhone Air - Space Black - Portrait",
+          "appstore_device_type": "IPHONE_69"
+        }
+      },
+      "Cloud White": {
+        "Portrait": {
+          "x": "60",
+          "y": "72",
+          "name": "iPhone Air - Cloud White - Portrait",
+          "appstore_device_type": "IPHONE_69"
+        }
+      },
+      "Light Gold": {
+        "Portrait": {
+          "x": "60",
+          "y": "72",
+          "name": "iPhone Air - Light Gold - Portrait",
+          "appstore_device_type": "IPHONE_69"
+        }
+      },
+      "Sky Blue": {
+        "Portrait": {
+          "x": "60",
+          "y": "72",
+          "name": "iPhone Air - Sky Blue - Portrait",
+          "appstore_device_type": "IPHONE_69"
+        }
+      }
+    },
+    "16 Plus": {
+      "Plus": {
+        "Black": {
+          "Portrait": {
+            "y": "80",
+            "x": "80",
+            "name": "iPhone 16 Plus - Black - Portrait",
+            "appstore_device_type": "IPHONE_69"
+          }
+        },
+        "Pink": {
+          "Portrait": {
+            "y": "80",
+            "x": "80",
+            "name": "iPhone 16 Plus - Pink - Portrait",
+            "appstore_device_type": "IPHONE_69"
+          }
+        },
+        "Teal": {
+          "Portrait": {
+            "y": "80",
+            "x": "80",
+            "name": "iPhone 16 Plus - Teal - Portrait",
+            "appstore_device_type": "IPHONE_69"
+          }
+        },
+        "Ultramarine": {
+          "Portrait": {
+            "y": "80",
+            "x": "80",
+            "name": "iPhone 16 Plus - Ultramarine - Portrait",
+            "appstore_device_type": "IPHONE_69"
+          }
+        },
+        "White": {
+          "Portrait": {
+            "y": "80",
+            "x": "80",
+            "name": "iPhone 16 Plus - White - Portrait",
+            "appstore_device_type": "IPHONE_69"
+          }
         }
       }
     },
@@ -404,6 +593,16 @@
       "y": "219",
       "name": "Watch Ultra 2022"
     },
+    "Ultra 2": {
+      "x": "95",
+      "y": "219",
+      "name": "AW Ultra 2"
+    },
+    "Ultra 3": {
+      "x": "89",
+      "y": "223",
+      "name": "AW Ultra 3"
+    },
     "Series 4": {
       "44": {
         "x": "66",
@@ -429,6 +628,25 @@
           "name": "Watch Series 7 45 Starlight"
         }
       }
+    },
+    "Series 11": {
+      "42mm": {
+        "x": "63",
+        "y": "160",
+        "name": "Apple Watch S11 42mm"
+      },
+      "46mm": {
+        "x": "75",
+        "y": "189",
+        "name": "Apple Watch S11 46mm"
+      }
+    }
+  },
+  "Apple TV": {
+    "4K": {
+      "x": "230",
+      "y": "310",
+      "name": "Apple TV - 4K"
     }
   },
   "version": "2.5"
