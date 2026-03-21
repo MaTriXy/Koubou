@@ -76,6 +76,11 @@ koubou = [
     "frames/*.json"
 ]
 
+[tool.setuptools.exclude-package-data]
+"*" = [
+    "*.png"
+]
+
 [tool.black]
 line-length = 88
 target-version = ['py39']

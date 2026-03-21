@@ -6,6 +6,10 @@ recursive-include src/koubou *.py
 recursive-include src/koubou/frames *.json
 include src/koubou/frames/*.json
 
+# Exclude device frame PNGs (downloaded on demand)
+recursive-exclude src/koubou/frames *.png
+global-exclude *.png
+
 # Include package metadata
 include pyproject.toml
 include LICENSE*
