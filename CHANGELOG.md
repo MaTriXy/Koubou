@@ -5,6 +5,16 @@ All notable changes to Koubou will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.1] - 2026-03-24
+
+### Fixed
+- iPhone Air native frames now auto-fit inside the requested output canvas, preventing bezel clipping at `iPhone6_9_alt` (`1260×2736`) and similar overflow cases
+- Frame lookup now falls back to `src/koubou/frames` when running from a source checkout whose installed wheel does not bundle PNG frame assets
+- Development builds no longer attempt impossible frame downloads for non-release version strings such as `0.1.dev1+g...`; they fail with a clearer source-checkout guidance instead
+
+### Testing
+- 405 tests passing locally
+
 ## [0.18.0] - 2026-03-21
 
 ### Added
