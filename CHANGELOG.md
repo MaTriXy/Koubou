@@ -5,6 +5,13 @@ All notable changes to Koubou will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.2] - 2026-04-02
+
+### Fixed
+- `position` values with pixel suffixes (e.g. `["100px", "50px"]`) now parse correctly in screenshot generation for both text and image content items.
+- Mixed position formats (e.g. `["50%", "120px"]`) now work consistently.
+- Added regression tests to prevent reintroducing pixel-position parsing failures in project generation.
+
 ## [0.18.1] - 2026-03-24
 
 ### Fixed
